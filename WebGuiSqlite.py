@@ -3,15 +3,9 @@ import os
 from IPython.display import display, HTML, clear_output
 #
 display(HTML("<style>.container { width:100% !important; }</style>"))
-#clear_output()
 print(f"Loading from '{__file__}'")
 
 import socket
-def gethostport():
-  from notebook import notebookapp
-  servers = list(notebookapp.list_running_servers())
-  return socket.gethostname(), servers[0]['port']
-"http://%s:%d" % gethostport()
 
 from IPython.display import display, Javascript, HTML, clear_output
 import IPython
