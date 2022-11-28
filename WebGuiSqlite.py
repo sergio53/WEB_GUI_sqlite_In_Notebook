@@ -1,7 +1,6 @@
 import os
 
 from IPython.display import display, HTML, clear_output
-#print(f"Loading from '{__file__}'")
 display(f"Loading from '{__file__}'")
 display(HTML("<style>.container { width:100% !important; }</style>"))
 
@@ -65,18 +64,15 @@ import os.path
 
 class WebGuiSqlite:
   def __init__(self):
-    self.xls_uploader = widgets.FileUpload(description="Upload Excel workbook", accept='.xls,.xlsx,.xlsm')
+    self.xls_uploader = widgets.FileUpload(description="Upload Excel workbook & converting to SQLite-file",
+                                           accept='.xls,.xlsx,.xlsm')
   def __call__(self):
     return self.xls_uploader.value[0]
   def xlsupload(self):
     display(self.xls_uploader)
 
-  def xls2sqlite(self):
-    if len(self.xls_uploader.value) == 0:
-      msgBox("converting Excel-file to SQLite-file","Excel-file not loaded","ERROR!")
-      return
-    ioData = io.BytesIO(self.xls_uploader.value[0].content.tobytes())
-
+  def xls2sqlite(self,change):
+    ioData = io.BytesIO(change.new[0].content.tobytes())
     con = sqlite3.connect(":memory:")
     wb = pd.ExcelFile(ioData)
     for sheet in wb.sheet_names:
@@ -91,11 +87,11 @@ class WebGuiSqlite:
 
     from IPython.display import FileLink
     display(FileLink(dbPath))
+    msgBox('Workbook uploaded & converted successfully', change.new[0].name, 'continue')
 
   def runGui(self, opt=0):
     os.system('pkill -f "python -m http.server"')
     os.system('python -m http.server -d "site" 8002 > /dev/null 2>&1 &')
-    #print(os.system('ps -ef | grep "python -m http.server" | grep -v grep'))
     
     if opt==1:
       script = '''<script>window.location.assign("http://%s:8002/site1/Web-GUI-for-SQLite.html");</script>''' % socket.gethostname()
@@ -114,33 +110,29 @@ class WebGuiSqlite:
 def applet():
   clear_output()
   from ipywidgets import HBox, Label, Button, Layout
-  #global WGS
   
   WGS = WebGuiSqlite()
-  
+  WGS.xls_uploader.observe(WGS.xls2sqlite, 'value')
+
   style={'font_weight': 'bold_', 'font_size': '14px'}
   b1 = Button(description="run Web GUI for SQLite", layout=Layout(width='20%', height='30px'), style=style)
   b2 = Button(description="run SQLite Viewer", layout=b1.layout, style=style)
-  b3 = Button(description="converting Excel-file to SQLite-file", layout=b1.layout, style=style)
-  b4 = Button(description="reset", layout=b1.layout, style=style)
+  b3 = Button(description="reset", layout=b1.layout, style=style)
   def on_b1(b):
     WGS.runGui(opt=1)
   def on_b2(b):
     WGS.runGui(opt=2)
   def on_b3(b):
-    WGS.xls2sqlite()
-  def on_b4(b):
     applet()
     
   b1.on_click(on_b1)
   b2.on_click(on_b2)
   b3.on_click(on_b3)
-  b4.on_click(on_b4)
 
-  WGS.xls_uploader.layout=b1.layout
+  WGS.xls_uploader.layout = Layout(width='50%')
   WGS.xls_uploader.style=style
   
-  H=HBox([b1, b2, WGS.xls_uploader,b3,b4])
+  H=HBox([b1, b2, WGS.xls_uploader,b3])
   display(H)
   
 applet()
