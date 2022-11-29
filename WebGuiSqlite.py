@@ -123,7 +123,7 @@ def applet():
   WGS.xls_uploader.layout = Layout(width='50%')
   WGS.xls_uploader.style=style
   
-  H=HBox([b1, b2, WGS.xls_uploader,b3])
+  H=HBox([WGS.xls_uploader, b1, b2, b3])
   display(H)
   
 applet()
