@@ -1,9 +1,5 @@
 import os
 
-from IPython.display import display, HTML, clear_output
-display(f"Loading from '{__file__}'")
-display(HTML("<style>.container { width:100% !important; }</style>"))
-
 import socket
 
 from IPython.display import display, Javascript, HTML, clear_output
@@ -29,7 +25,6 @@ def popup(line, cell=None):
   _s += f'width={_w}, height={_h}");'
   _s += f'\nwin.document.write(`\n{html}\n`);'
   display(Javascript(_s))  
-  #clear_output()
   return
 
 IPython.get_ipython().register_magic_function(popup, 'line')
