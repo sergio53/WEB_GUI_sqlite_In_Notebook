@@ -96,11 +96,7 @@ class WebGuiSqlite:
       script = '''<script>window.location.assign("http://%s:8002/site2/index.html");</script>''' % socket.gethostname()
       popup('1000,700', cell=script)
       return
-    
-    os.system('pkill -f "python -m http.server"')
-    os.system('ps -ef | grep "python -m http.server" | grep -v grep')
 # .............................................................................................................................
-#WGS = None
 
 def applet():
   clear_output()
