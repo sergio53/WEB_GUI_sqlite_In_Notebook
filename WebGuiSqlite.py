@@ -53,12 +53,17 @@ import ipywidgets as widgets
 import io
 import pandas as pd
 
+import time
 import sqlite3
 import os.path
+import subprocess
+import sys
 
 
 class WebGuiSqlite:
   def __init__(self):
+    self.osname = os.name
+    self.subpy = None
     self.xls_uploader = widgets.FileUpload(description="Upload Excel workbook & converting to SQLite-file",
                                            accept='.xls,.xlsx,.xlsm')
   def __call__(self):
@@ -84,18 +89,26 @@ class WebGuiSqlite:
     display(FileLink(dbPath))
     msgBox('Workbook uploaded & converted successfully', change.new[0].name, 'continue')
 
-  def runGui(self, opt=0):
-    os.system('pkill -f "python -m http.server"')
-    os.system('python -m http.server -d "site" 8002 > /dev/null 2>&1 &')
+  def kill(self):
+    time.sleep(1.5)
+    if self.osname == 'posix':
+      os.system('pkill -f "python -m http.server"')
+    else:
+      if type(self.subpy) is subprocess.Popen: self.subpy.kill()    
+    time.sleep(0.5)
     
+  def runGui(self, opt=0):
+    self.kill()
+    self.subpy = subprocess.Popen([sys.executable, "-m", "http.server", "-d", "site", "8002"], 
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(0.5)
     if opt==1:
       script = '''<script>window.location.assign("http://%s:8002/site1/Web-GUI-for-SQLite.html");</script>''' % socket.gethostname()
       popup('', cell=script)
-      return
     elif opt==2:  
       script = '''<script>window.location.assign("http://%s:8002/site2/index.html");</script>''' % socket.gethostname()
       popup('1000,700', cell=script)
-      return
+    self.kill()
 # .............................................................................................................................
 
 def applet():
@@ -108,22 +121,18 @@ def applet():
   style={'font_weight': 'bold_', 'font_size': '14px'}
   b1 = Button(description="run Web GUI for SQLite", layout=Layout(width='20%', height='30px'), style=style)
   b2 = Button(description="run SQLite Viewer", layout=b1.layout, style=style)
-  b3 = Button(description="reset", layout=b1.layout, style=style)
   def on_b1(b):
     WGS.runGui(opt=1)
   def on_b2(b):
     WGS.runGui(opt=2)
-  def on_b3(b):
-    applet()
     
   b1.on_click(on_b1)
   b2.on_click(on_b2)
-  b3.on_click(on_b3)
 
   WGS.xls_uploader.layout = Layout(width='50%')
   WGS.xls_uploader.style=style
   
-  H=HBox([WGS.xls_uploader, b1, b2, b3])
+  H=HBox([WGS.xls_uploader, b1, b2])
   display(H)
   
 applet()
