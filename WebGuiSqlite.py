@@ -1,5 +1,4 @@
 import os
-
 import socket
 
 from IPython.display import display, Javascript, HTML, clear_output
