@@ -90,12 +90,10 @@ class WebGuiSqlite:
     msgBox('Workbook uploaded & converted successfully', change.new[0].name, 'continue')
 
   def kill(self):
-    time.sleep(1.5)
     if self.osname == 'posix':
       os.system('pkill -f "python -m http.server"')
     else:
       if type(self.subpy) is subprocess.Popen: self.subpy.kill()    
-    time.sleep(0.5)
     
   def runGui(self, opt=0):
     self.kill()
@@ -108,6 +106,7 @@ class WebGuiSqlite:
     elif opt==2:  
       script = '''<script>window.location.assign("http://%s:8002/site2/index.html");</script>''' % socket.gethostname()
       popup('1000,700', cell=script)
+    time.sleep(2.0)  
     self.kill()
 # .............................................................................................................................
 
